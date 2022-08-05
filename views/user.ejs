@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  <title>User Page</title>
+</head>
+<body>
+  <div class="flex justify-center users dark:bg-gray-900 user-page h-full pb-5 pt-5">
+    <h1 class="text-4xl font-normal leading-normal mt-0 mb-2 text-slate-800 text-white">User info</h1>
+  <ol class="bg-white rounded-lg border border-gray-700 w-96 text-gray-900 user-list">
+    <% users.forEach(function(user){ %>
+        <li class="px-6 py-2 border-b border-gray-400 w-full rounded-t-lg"> 
+            <b>Username</b> : <%= user.username %> <br> 
+            <b>Fullname</b> : <%= user.fullname %> <br>
+            <b>Contact</b> : <%= user.contact %> <br>
+            <b>Aadhar number</b> : <%= user.aadharnum %> <br>
+            <b>Role</b> : <%= user.role %> </li>
+    <% }) %>
+  
+   </ol>
+</div>
+  <a href="/logout" class="logout bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6" id="logout"> Log Out</a>
+
+  
+</body>
+</html>
