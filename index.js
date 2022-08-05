@@ -132,13 +132,17 @@ app.post("/register", function(req, res){
   });
 
 app.get("/user/:username",(req,res)=>{
-  const username=req.params.username;
+  if(req.isAuthenticated()){
+    const username=req.params.username;
   // console.log(req.params);
-  User.find({username: username},(err,user)=>{
+    User.find({username: username},(err,user)=>{
     // console.log(user);
     res.render("user",{users: user});
-  });
-  
+    });
+}else{
+  res.send("please login/register first")
+}
+
   // console.log(raj);console.log(raj.contact);
     // res.render("user");
 });
