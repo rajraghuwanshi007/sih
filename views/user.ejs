@@ -18,7 +18,9 @@
             <b>Fullname</b> : <%= user.fullname %> <br>
             <b>Contact</b> : <%= user.contact %> <br>
             <b>Aadhar number</b> : <%= user.aadharnum %> <br>
-            <b>Role</b> : <%= user.role %> </li>
+            <b>Role</b> : <%= user.role %> 
+            <img src="data:image/<%=user.img.contentType%>;base64,
+            <%=user.img.data.toString('base64')%>">  </li>
     <% }) %>
   
    </ol>

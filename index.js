@@ -3,22 +3,34 @@ const ejs = require('ejs');
 const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
-const crypto = require('crypto');
-// const db = require('../db');
 require('dotenv').config();
 const bodyParser =require("body-parser");
 const mongoose=require("mongoose");
-const passportLocalMongoose = require('passport-local-mongoose');
-const findOrCreate = require('mongoose-findorcreate');
 const { db } = require('../../Users/rajra/Downloads/sih-project/model/User');
 const { sensitiveHeaders } = require('http2');
+var multer = require('multer');
+const fs=require("fs");
+const path =require("path");
+const alert =require("alert")
 
 
 const app = express();
 
 app.use(express.static("public"));
 app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json())
+
+var storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, 'uploads')
+	},
+	filename: (req, file, cb) => {
+		cb(null, file.fieldname + '-' + Date.now())
+	}
+});
+
+var upload = multer({ storage: storage });
 
 app.use(session({
     secret: "Our little secret.",               //take from env
@@ -30,45 +42,7 @@ app.use(session({
   app.use(passport.session());
 
  mongoose.connect("mongodb://localhost:27017/sih");
-const userSchema= new mongoose.Schema({
-    username: {
-        type: String,
-        unique: true,
-        required: true,
-      },
-      fullname: {
-        type: String,
-        // unique: true,
-        required: true,
-      },
-      contact: {
-        type: Number,
-        unique: true,
-        required: true,
-      },
-      aadharnum: {
-        type: Number,
-        unique: true,
-        required: true,
-      },
-      password: {
-        type: String,
-        minlength: 6,
-      },
-      role: {
-        type: String,
-        default: "Basic",
-        required: true,
-      },
-});
-
-userSchema.plugin(passportLocalMongoose);
-userSchema.plugin(findOrCreate);
-
-
-const User =mongoose.model("User", userSchema);
-
-passport.use(User.createStrategy());
+const User=require("./model")
 
 passport.serializeUser(function(user, done) {
   done(null, user.id);
@@ -114,13 +88,16 @@ app.get("/register",(req,res)=>{
     res.render("register");
 });
 
-app.post("/register", function(req, res){
-    // console.log("raj");
+app.post("/register", upload.single('image'),function(req, res){
     const username=req.body.username;
-    // console.log(username);
-    User.register({username: req.body.username, fullname: req.body.fullname, contact:req.body.contact, aadharnum:req.body.aadharnum, role:req.body.role }, req.body.password, function(err, user){
+    User.register({username: req.body.username, fullname: req.body.fullname, contact:req.body.contact, aadharnum:req.body.aadharnum, role:req.body.role, img: {
+			data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
+			contentType: 'image/png'
+		} }, req.body.password, function(err, user){
       if (err) {
+        console.log(req.body);
         console.log(err);
+        alert("The username is already taken")
         res.redirect("/register");
       } else {
         passport.authenticate("local")(req, res, function(){
@@ -134,17 +111,14 @@ app.post("/register", function(req, res){
 app.get("/user/:username",(req,res)=>{
   if(req.isAuthenticated()){
     const username=req.params.username;
-  // console.log(req.params);
     User.find({username: username},(err,user)=>{
-    // console.log(user);
     res.render("user",{users: user});
     });
 }else{
-  res.send("please login/register first")
+  window.alert("please login/register first");
+  res.redirect("/");
 }
 
-  // console.log(raj);console.log(raj.contact);
-    // res.render("user");
 });
 
 app.get("/logout", function(req, res){
